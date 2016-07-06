@@ -30,11 +30,7 @@ func main() {
 }
 
 var (
-	db_name      = os.Getenv("POSTGRES_DB")
-	db_user = os.Getenv("POSTGRES_USER")
-	db_pwd  = os.Getenv("POSTGRES_PASSWORD")
-	db_host = os.Getenv("SEED_HOST")
-	db_port = os.Getenv("SEED_PORT")
+	connStr = os.Getenv("HOST_POSTGRES_SINGLE")
 )
 
 type Likes struct {
@@ -129,12 +125,11 @@ func sendResp(resp *Response, err error, w http.ResponseWriter) {
 func dbConnection() (db *sql.DB, err error) {
 	for i := 0; i < 10; i++ {
 		if i > 0 {
-			log.Printf("DB connection attempt %d of 10 failed; retrying (%s)", i, err.Error())
+			log.Printf("DB connection attempt %d of 10 failed; retrying (%s) connect string (%s)", i, err.Error(), connStr)
 		}
 
 		//ex: "postgres://postgres:postgres@test--pgtest--pgsingle--1164ae-0.service.consul:4000/postgresDB?sslmode=disable"
-		connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", db_user, db_pwd, db_host, db_port, db_name)
-		 log.Println(connStr)
+		log.Println(connStr)
 		db, err = sql.Open("postgres", connStr)
 		if err = db.Ping(); err == nil {
 			if i > 0 {
