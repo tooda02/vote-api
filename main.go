@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+        "strings"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -31,6 +32,7 @@ func main() {
 
 var (
 	connStr = os.Getenv("HOST_POSTGRES_SINGLE")
+	deployTarget = os.Getenv("DEPLOY_TARGET")
 )
 
 type Likes struct {
@@ -129,6 +131,10 @@ func dbConnection() (db *sql.DB, err error) {
 		}
 
 		//ex: "postgres://postgres:postgres@test--pgtest--pgsingle--1164ae-0.service.consul:4000/postgresDB?sslmode=disable"
+                if strings.Contains(deployTarget, "LOCAL_SANDBOX")  {
+                    connStr = "postgres://postgres:postgres@postgres_single:5432/postgresDB?sslmode=disable"
+                }
+		log.Printf("Current deploy target %s",deployTarget)
 		log.Println(connStr)
 		db, err = sql.Open("postgres", connStr)
 		if err = db.Ping(); err == nil {
